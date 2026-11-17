@@ -33,3 +33,20 @@ def test_style_context_restores_settings():
     with style_context():
         assert matplotlib.rcParams["axes.linewidth"] == 2
     assert matplotlib.rcParams["axes.linewidth"] == previous
+
+def test_approved_unit_brackets():
+    from figentra import approved_unit_label
+    assert approved_unit_label("Concentration (uM)") == "Concentration [µM]"
+    assert approved_unit_label("Response (%)") == "Response [%]"
+    assert approved_unit_label("Time (s)") == "Time [s]"
+    assert approved_unit_label("Signal (background)") == "Signal (background)"
+    assert approved_unit_label("Heat [µcal]") == "Heat [µcal]"
+
+def test_existing_axis_labels_normalized():
+    fig, ax = new_figure()
+    ax.set_xlabel("Concentration (uM)")
+    ax.set_ylabel("Response (%)")
+    style_axes(ax)
+    assert ax.get_xlabel() == "Concentration [µM]"
+    assert ax.get_ylabel() == "Response [%]"
+    plt.close(fig)
