@@ -8,7 +8,13 @@ Figentra is a lightweight Matplotlib styling package that reproduces the approve
 
 ## Installation
 
-Install from the official GitHub repository today:
+Install the stable release from PyPI:
+
+```bash
+python -m pip install --upgrade figentra
+```
+
+Or install the development version directly from GitHub:
 
 ```bash
 pip install git+https://github.com/peterDataScientia/figentra.git
@@ -23,7 +29,7 @@ pip install -e ".[dev]"
 pytest -q
 ```
 
-The `pip install figentra` command will become available **after** the first successful PyPI release.
+The package is publicly available on PyPI.
 
 ## Usage
 
@@ -60,7 +66,7 @@ For temporary style changes without altering global configuration, use `with sty
 | Canvas | 130 × 100 mm |
 | Font | DejaVu Sans |
 | Base font | 12 pt |
-| Axis labels | 15 pt, bold |
+| Axis labels | 15 pt, bold; recognized unit labels use square brackets |
 | Tick labels | 12 pt, bold |
 | Legend | 11 pt, bold, no frame |
 | Axes | Left/bottom 2 pt; top/right hidden |
@@ -73,6 +79,10 @@ For temporary style changes without altering global configuration, use `with sty
 
 Approved figure-specific colors, data scales, legend positioning and `subplots_adjust` are deliberately controlled by each plot rather than forced globally.
 
+## v0.1.1: approved unit brackets
+
+`style_axes(ax, xlabel="Concentration (uM)", ylabel="Response (%)")` now renders **Concentration [µM]** and **Response [%]**. It also normalizes existing axis labels when called without explicit labels. Unrecognized parentheses (such as a sample descriptor) are preserved.
+
 ## Python API
 
 - `apply_style()`: enable approved global Matplotlib styling
@@ -84,7 +94,7 @@ Approved figure-specific colors, data scales, legend positioning and `subplots_a
 
 ## Release and PyPI
 
-GitHub Actions tests Python 3.9, 3.11 and 3.13 on push/PR. A separate release workflow builds and publishes using PyPI Trusted Publishing. To activate public `pip install figentra`, configure a trusted publisher on PyPI using GitHub owner `peterDataScientia`, repository `figentra`, workflow `publish.yml`, environment `pypi`; create the GitHub `pypi` environment and publish a GitHub Release after CI passes. Publishing requires your own PyPI authorization; simply pushing this repository does not publish the package.
+GitHub Actions tests Python 3.9, 3.11 and 3.13 on push/PR. A separate release workflow builds and publishes using PyPI Trusted Publishing. The GitHub Release workflow publishes new versions through the configured PyPI Trusted Publisher. A release tag alone does not activate publication until the workflow succeeds.
 
 ## License
 
