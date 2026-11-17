@@ -4,6 +4,7 @@ Only presentation is changed; scientific observations and fits are untouched.
 """
 from contextlib import contextmanager
 from pathlib import Path
+import re
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
@@ -42,6 +43,34 @@ def new_figure(*, size_mm=None, **kwargs):
     style_axes(ax)
     return fig, ax
 
+_UNIT_ALIASES = {
+    "%": "%", "uM": "µM", "μM": "µM", "µM": "µM",
+    "nM": "nM", "mM": "mM", "M": "M", "pM": "pM",
+    "s": "s", "ms": "ms", "min": "min", "h": "h",
+    "µs": "µs", "us": "µs", "μs": "µs",
+    "RU": "RU", "a.u.": "a.u.", "AU": "AU",
+    "°C": "°C", "K": "K", "µW": "µW", "uW": "µW",
+    "kcal/mol": "kcal/mol", "Å": "Å", "nm": "nm",
+}
+_TRAILING_UNIT = re.compile(r"^(.*?)\\s*\\(([^()]*)\\)\\s*$")
+
+def approved_unit_label(value):
+    """Convert recognized trailing unit parentheses to approved square brackets.
+
+    E.g. 'Concentration (uM)' -> 'Concentration [µM]'.
+    Unrecognized parenthetical phrases are left untouched.
+    """
+    if value is None:
+        return None
+    match = _TRAILING_UNIT.fullmatch(str(value))
+    if not match:
+        return value
+    label, unit = match.groups()
+    normalized = _UNIT_ALIASES.get(unit.strip())
+    if normalized is None:
+        return value
+    return f"{label.rstrip()} [{normalized}]"
+
 def style_axes(ax, *, xlabel=None, ylabel=None):
     """Enforce approved spines, ticks, labels, and white background."""
     for side in ("top", "right"):
@@ -54,10 +83,11 @@ def style_axes(ax, *, xlabel=None, ylabel=None):
     ax.minorticks_off()
     ax.grid(False)
     ax.set_facecolor("white")
-    if xlabel is not None:
-        ax.set_xlabel(xlabel)
-    if ylabel is not None:
-        ax.set_ylabel(ylabel)
+    # Normalize requested labels and labels previously set on the axes.
+    ax.set_xlabel(approved_unit_label(
+        xlabel if xlabel is not None else ax.get_xlabel()))
+    ax.set_ylabel(approved_unit_label(
+        ylabel if ylabel is not None else ax.get_ylabel()))
     for label in (ax.xaxis.label, ax.yaxis.label):
         label.set_fontsize(15)
         label.set_fontweight("bold")
