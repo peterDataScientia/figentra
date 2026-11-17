@@ -2,6 +2,9 @@ name: Publish to PyPI
 on:
   release:
     types: [published]
+  push:
+    paths:
+      - ".github/workflows/publish.yml"
 permissions:
   contents: read
 jobs:
@@ -10,12 +13,32 @@ jobs:
     environment: pypi
     permissions:
       id-token: write
-      contents: read
+      contents: write
     steps:
       - uses: actions/checkout@v4
+      - name: Create Figentra v0.1.2 release (one-time)
+        if: github.event_name == 'push'
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          if gh release view v0.1.2 >/dev/null 2>&1; then
+            echo "created=false" >> "$GITHUB_OUTPUT"
+            echo "v0.1.2 release already exists; skipping creation."
+          else
+            gh release create v0.1.2 --target "$GITHUB_SHA" --title "Figentra v0.1.2" --notes "Fix approved unit-label brackets; retain standardized scientific figure styling and multi-format export." --latest
+            echo "created=true" >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/setup-python@v5
+        if: github.event_name == 'release' || steps.release.outputs.created == 'true'
         with:
           python-version: "3.11"
-      - run: python -m pip install build
-      - run: python -m build
+      - name: Install build
+        if: github.event_name == 'release' || steps.release.outputs.created == 'true'
+        run: python -m pip install build
+      - name: Build distributions
+        if: github.event_name == 'release' || steps.release.outputs.created == 'true'
+        run: python -m build
       - uses: pypa/gh-action-pypi-publish@release/v1
+        if: github.event_name == 'release' || steps.release.outputs.created == 'true'
