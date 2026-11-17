@@ -52,7 +52,7 @@ _UNIT_ALIASES = {
     "°C": "°C", "K": "K", "µW": "µW", "uW": "µW",
     "kcal/mol": "kcal/mol", "Å": "Å", "nm": "nm",
 }
-_TRAILING_UNIT = re.compile(r"^(.*?)\\s*\\(([^()]*)\\)\\s*$")
+_TRAILING_UNIT = re.compile(r"^(.*?)\s*\(([^()]*)\)\s*$")
 
 def approved_unit_label(value):
     """Convert recognized trailing unit parentheses to approved square brackets.
