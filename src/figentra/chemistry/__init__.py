@@ -24,7 +24,7 @@ class Bond:
 
 _COLORS = {"O": "#D9232B", "N": "#225ACB", "C": "#344054",
            "H": "#E5E7EB", "S": "#D5A21C", "P": "#D97706"}
-_KINDS = {"single", "double", "triple", "hydrogen", "forming", "breaking"}
+_KINDS = {"single", "double", "triple", "aromatic", "hydrogen", "forming", "breaking"}
 
 def _point(p):
     p = tuple(float(x) for x in p)
@@ -91,11 +91,11 @@ def molecular_interaction(atoms, bonds, *, width=800, height=360,
         x1,y1=a.x+ux*radius[a.id],a.y+uy*radius[a.id]
         x2,y2=c.x-ux*radius[c.id],c.y-uy*radius[c.id]
         color={"hydrogen":"#16834E","forming":"#2563EB","breaking":"#B45309"}.get(b.kind,"#9299A3")
-        offsets={"double":(-3,3),"triple":(-6,0,6)}.get(b.kind,(0,))
+        offsets={"double":(-3,3),"triple":(-6,0,6),"aromatic":(-3,3)}.get(b.kind,(0,))
         for o in offsets:
             attrs=dict(x1=x1-uy*o,y1=y1+ux*o,x2=x2-uy*o,y2=y2+ux*o,
                        stroke=color,stroke_width=line_width,stroke_linecap="round")
-            if b.kind in ("hydrogen","forming","breaking"):
+            if b.kind in ("hydrogen","forming","breaking") or (b.kind=="aromatic" and o>0):
                 attrs["stroke_dasharray"]="8 7"
             _add(root,"line",**attrs)
         if b.label:
@@ -137,3 +137,6 @@ __all__ += ["CartesianAtom", "read_xyz", "read_pdb", "read_sdf", "geometry_inter
 
 from .detection import detect_bonds, detect_covalent_bonds, detect_hydrogen_bonds
 __all__ += ["detect_bonds", "detect_covalent_bonds", "detect_hydrogen_bonds"]
+
+from .bond_orders import assign_bond_orders, read_sdf_bonds
+__all__ += ["assign_bond_orders", "read_sdf_bonds"]
