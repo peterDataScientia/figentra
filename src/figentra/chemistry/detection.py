@@ -63,7 +63,7 @@ def detect_hydrogen_bonds(atoms, covalent_bonds, *, acceptor_ids,
         raise ValueError("Hydrogen cannot be an acceptor in this detector")
     adjacency={a.id:set() for a in atoms}
     for b in covalent_bonds:
-        if b.kind not in ("single","double","triple") or b.start not in by_id or b.end not in by_id or b.start==b.end:
+        if b.kind not in ("single","double","triple","aromatic") or b.start not in by_id or b.end not in by_id or b.start==b.end:
             raise ValueError("Expected valid covalent bonds")
         adjacency[b.start].add(b.end)
         adjacency[b.end].add(b.start)
