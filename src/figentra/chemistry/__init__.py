@@ -143,3 +143,6 @@ __all__ += ["assign_bond_orders", "read_sdf_bonds"]
 
 from .noncovalent import Interaction, detect_non_covalent, interaction_bonds
 __all__ += ["Interaction", "detect_non_covalent", "interaction_bonds"]
+
+from .features import ChemicalFeatures, perceive_features, features_from_smiles, features_from_sdf, screen_sdf_contacts
+__all__ += ["ChemicalFeatures", "perceive_features", "features_from_smiles", "features_from_sdf", "screen_sdf_contacts"]
