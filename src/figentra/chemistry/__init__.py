@@ -131,3 +131,6 @@ from .reactions import (ElectronArrow, reaction_mechanism, molecular_structure,
                         reaction_scheme, protonation_states, export_chemistry)
 __all__ += ["ElectronArrow", "reaction_mechanism", "molecular_structure",
             "reaction_scheme", "protonation_states", "export_chemistry"]
+
+from .geometry import CartesianAtom, read_xyz, read_pdb, read_sdf, geometry_interaction
+__all__ += ["CartesianAtom", "read_xyz", "read_pdb", "read_sdf", "geometry_interaction"]
