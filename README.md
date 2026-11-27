@@ -125,3 +125,31 @@ save_figure(fig, "schedule")
 ```
 
 Other functions: `research_workflow(steps)`, `problem_tree(problem, causes, consequences)`, `network_diagram(nodes, edges)`, `conceptual_framework(nodes, edges)`, `biological_pathway(steps)`, and `mechanism_diagram(steps)`. The last two are linear conceptual sequences, not biochemical structure renderers. Gantt tasks use numeric start and duration in the same units. TIFF is optional; the original default formats are unchanged.
+
+
+## Native SVG chemistry (development)
+
+Install optional chemistry dependencies: `pip install -e ".[chemistry,dev]"`.
+CairoSVG requires a working system Cairo installation. SVG-only primitives do not require RDKit.
+
+```python
+from figentra.chemistry import read_xyz, assign_bond_orders, geometry_interaction, export_chemistry
+atoms = read_xyz("optimized.xyz")
+bonds = assign_bond_orders(atoms, charge=0)
+svg = geometry_interaction(atoms, bonds)
+export_chemistry(svg, "molecule.svg")
+```
+
+For aligned receptor PDB and ligand SDF:
+
+```python
+from figentra.chemistry import screen_protein_ligand, protein_ligand_map, write_contact_csv, export_chemistry
+contacts = screen_protein_ligand("protein.pdb", "ligand.sdf")
+write_contact_csv(contacts, "contacts.csv")
+svg = protein_ligand_map("ligand.sdf", contacts, height=1000)
+export_chemistry(svg, "contacts.svg")
+```
+
+The chemistry engine also provides SMILES/SDF feature perception, explicit reaction schemes, electron arrows, and geometric contact screening. Distances come from supplied Cartesian coordinates; 2D diagrams are schematic. XYZ bond orders require complete explicit-hydrogen geometry and correct total charge. Protein templates assume conventional protonation; polar proximity and water bridges are candidates, not confirmed hydrogen bonds. No automatic docking, pH prediction, energetic inference or periodic boundary handling. Dense diagrams may contain connector crossings. Chemistry functionality is under validation, and is not represented as an independently benchmarked stable release.
+
+Run full tests with `python -m pytest -q` after installing chemistry and development extras.
