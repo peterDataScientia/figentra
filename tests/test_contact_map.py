@@ -35,4 +35,10 @@ def test_empty(ligand):
 def test_crowding(ligand):
     c=ProteinContact("hydrogen",("L:7",),("P:1",),"A:ASN140",2.0)
     with pytest.raises(ValueError,match="Crowded"):
-        protein_ligand_map(ligand,[c]*12,height=500)
+        protein_ligand_map(ligand,[c]*12,height=500,auto_height=False)
+
+
+def test_auto_height(ligand):
+    c=ProteinContact("hydrogen",("L:7",),("P:1",),"A:ASN140",2.0)
+    root=ET.fromstring(protein_ligand_map(ligand,[c]*12,height=500))
+    assert float(root.get("height"))>500
