@@ -105,19 +105,20 @@ def legend_bold(ax, **kwargs):
     return ax.legend(**kwargs)
 
 def save_figure(fig, name, *, output_dir=".", formats=None, dpi=None, close=False):
-    """Save PNG/PDF/SVG; returns list of Path objects."""
+    """Save PNG/PDF/SVG/TIFF; returns list of Path objects."""
     name = str(name)
     if not name or Path(name).name != name or Path(name).suffix:
         raise ValueError("name must be a filename stem without directories or extension")
     folder = Path(output_dir)
     folder.mkdir(parents=True, exist_ok=True)
     formats = tuple(formats or APPROVED_STYLE["formats"])
-    if not formats or any(f not in ("png", "pdf", "svg") for f in formats):
-        raise ValueError("formats must contain png, pdf or svg")
+    if not formats or any(f not in ("png", "pdf", "svg", "tiff", "tif") for f in formats):
+        raise ValueError("formats must contain png, pdf, svg, tif or tiff")
     saved = []
     for fmt in formats:
         path = folder / (name + "." + fmt)
-        fig.savefig(path, dpi=dpi or APPROVED_STYLE["dpi"], facecolor="white")
+        with mpl.rc_context(rc={"svg.fonttype": "none", "pdf.fonttype": 42}):
+            fig.savefig(path, dpi=dpi or APPROVED_STYLE["dpi"], facecolor=fig.get_facecolor())
         saved.append(path)
     if close:
         plt.close(fig)
