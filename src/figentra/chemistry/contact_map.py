@@ -15,7 +15,7 @@ _COLORS={"hydrogen":"#16834E","polar_proximity":"#526477",
 
 def protein_ligand_map(ligand_sdf, contacts, *, record=0, width=1200,
                        height=800,font_size=16,max_contacts=24,
-                       background="white"):
+                       background="white", auto_height=True, show_legend=True):
     """Draw a central ligand and contact cards in two non-overlapping columns.
 
     Each contact is retained separately; if max_contacts is exceeded the
@@ -31,6 +31,15 @@ def protein_ligand_map(ligand_sdf, contacts, *, record=0, width=1200,
         raise ValueError("Use width >=900, height >=500 and font size <=24")
     if len(contacts)>max_contacts:
         raise ValueError("Too many contacts: select a subset or increase max_contacts")
+    if background != "white":
+        raise ValueError("Contact map currently supports white background for contrast")
+    cardh=max(66,font_size*4.2)
+    gap=14
+    legend_rows=(len({c.kind for c in contacts})+2)//3 if show_legend else 0
+    footer=65+legend_rows*30
+    required=160+footer+((len(contacts)+1)//2)*(cardh+gap)
+    if auto_height:
+        height=max(height,required)
     supplier=Chem.SDMolSupplier(str(ligand_sdf),removeHs=False)
     if record<0 or record>=len(supplier) or supplier[record] is None:
         raise ValueError("Invalid SDF record")
@@ -77,34 +86,38 @@ def protein_ligand_map(ligand_sdf, contacts, *, record=0, width=1200,
         k=min(range(len(sides[source])),key=lambda j:abs(sides[source][j][1]-width/2))
         sides[1-source].append(sides[source].pop(k))
     cardw=width*.23
-    cardh=max(66,font_size*4.2)
-    gap=14
-    available=height-160
+    available=height-160-footer
     if any(len(s)*cardh+max(0,len(s)-1)*gap>available for s in sides):
         raise ValueError("Crowded contact map: increase height or select contacts")
     # Place connectors first, then the chemical drawing and cards.
     cards=[]
+    water_nodes=[]
     for side,items in enumerate(sides):
         items.sort(key=lambda p:(p[0],p[1],p[2].residue,p[2].kind))
         total=len(items)*cardh+max(0,len(items)-1)*gap
         for j,(ay,ax,c) in enumerate(items):
-            cy=(height-total)/2+cardh/2+j*(cardh+gap)
+            cy=(height-footer-total)/2+cardh/2+j*(cardh+gap)+30
             cx=cardw/2+20 if side==0 else width-cardw/2-20
             edge=cx+cardw/2 if side==0 else cx-cardw/2
             color=_COLORS[c.kind]
+            rail=ox-18 if side==0 else ox+iw+18
+            # Fan out toward a routing rail outside the ligand drawing.
+            _add(root,"path",d=f"M{ax} {ay} L{rail} {cy}",fill="none",stroke=color,stroke_width=2,stroke_dasharray="6 5")
             if c.kind=="water_bridge_candidate":
-                wx=(ax+edge)/2; wy=(ay+cy)/2
-                _add(root,"line",x1=ax,y1=ay,x2=wx,y2=wy,stroke=color,stroke_width=2,stroke_dasharray="6 5")
+                wx=(rail+edge)/2; wy=cy
+                _add(root,"line",x1=rail,y1=cy,x2=wx,y2=wy,stroke=color,stroke_width=2,stroke_dasharray="6 5")
                 _add(root,"line",x1=wx,y1=wy,x2=edge,y2=cy,stroke=color,stroke_width=2,stroke_dasharray="6 5")
-                _add(root,"circle",cx=wx,cy=wy,r=17,fill="white",stroke=color,stroke_width=2)
-                _text(root,wx,wy,"H₂O",color,12)
+                water_nodes.append((wx,wy,color))
             else:
-                _add(root,"line",x1=ax,y1=ay,x2=edge,y2=cy,stroke=color,stroke_width=2,stroke_dasharray="6 5")
+                _add(root,"line",x1=rail,y1=cy,x2=edge,y2=cy,stroke=color,stroke_width=2,stroke_dasharray="6 5")
             cards.append((cx,cy,c,color))
     ligand_svg=ET.fromstring(drawer.GetDrawingText())
     ligand_svg.set("x",str(ox)); ligand_svg.set("y",str(oy))
     ligand_svg.set("width",str(iw)); ligand_svg.set("height",str(ih))
     root.append(ligand_svg)
+    for wx,wy,color in water_nodes:
+        _add(root,"circle",cx=wx,cy=wy,r=17,fill="white",stroke=color,stroke_width=2)
+        _text(root,wx,wy,"H₂O",color,12)
     for cx,cy,c,color in cards:
         _add(root,"rect",x=cx-cardw/2,y=cy-cardh/2,width=cardw,height=cardh,rx=8,fill="white",stroke=color,stroke_width=1.8)
         _text(root,cx,cy-font_size*1.25,c.residue,"#17212E",font_size)
@@ -113,6 +126,11 @@ def protein_ligand_map(ligand_sdf, contacts, *, record=0, width=1200,
         if c.kind=="hydrogen": distance+=" (H···A)"
         if c.second_distance is not None: distance+=f" / {c.second_distance:.2f} Å"
         _text(root,cx,cy+font_size*1.25,distance,color,font_size*.85)
+    if show_legend:
+        for j,kind in enumerate(sorted({c.kind for c in contacts})):
+            x=width*(.17+(j%3)*.33); y=height-footer+25+(j//3)*30
+            _add(root,"line",x1=x-width*.13,y1=y,x2=x-width*.10,y2=y,stroke=_COLORS[kind],stroke_width=2,stroke_dasharray="6 5")
+            _text(root,x+width*.02,y,kind.replace("_"," "),_COLORS[kind],font_size*.85)
     if not contacts:
         _text(root,width/2,height-70,"No contacts detected","#526477",font_size)
     _text(root,width/2,height-32,"Water bridges and proximity contacts are geometric candidates.","#526477",font_size-2,"normal")
