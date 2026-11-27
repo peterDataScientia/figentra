@@ -134,3 +134,6 @@ __all__ += ["ElectronArrow", "reaction_mechanism", "molecular_structure",
 
 from .geometry import CartesianAtom, read_xyz, read_pdb, read_sdf, geometry_interaction
 __all__ += ["CartesianAtom", "read_xyz", "read_pdb", "read_sdf", "geometry_interaction"]
+
+from .detection import detect_bonds, detect_covalent_bonds, detect_hydrogen_bonds
+__all__ += ["detect_bonds", "detect_covalent_bonds", "detect_hydrogen_bonds"]
