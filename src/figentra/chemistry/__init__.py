@@ -149,3 +149,6 @@ __all__ += ["ChemicalFeatures", "perceive_features", "features_from_smiles", "fe
 
 from .protein import ReceptorAtom, ProteinContact, read_receptor, screen_protein_ligand, write_contact_csv, protein_contact_svg
 __all__ += ["ReceptorAtom", "ProteinContact", "read_receptor", "screen_protein_ligand", "write_contact_csv", "protein_contact_svg"]
+
+from .contact_map import protein_ligand_map
+__all__ += ["protein_ligand_map"]
