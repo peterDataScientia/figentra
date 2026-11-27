@@ -99,3 +99,29 @@ GitHub Actions tests Python 3.9, 3.11 and 3.13 on push/PR. A separate release wo
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+
+## Scientific diagrams (0.2.0)
+
+All diagram functions return a Matplotlib `(fig, ax)` pair. Use explicit line breaks for long labels. The three-circle diagram is conceptual, not area-proportional.
+
+```python
+from figentra.diagrams import venn_diagram, gantt_chart
+from figentra import save_figure
+
+fig, ax = venn_diagram(
+    ["HOST\nImmunity", "PATHOGEN\nBacteria", "ENVIRONMENT\nWater quality"],
+    center="DISEASE", size_mm=(180, 160)
+)
+save_figure(fig, "disease_triangle", formats=("svg", "pdf", "png", "tiff"))
+
+fig, ax = gantt_chart([
+    ("Literature review", 0, 2),
+    ("Data collection", 1, 3),
+    ("Analysis", 3, 2),
+    ("Writing", 4, 2),
+], xlabel="Month")
+save_figure(fig, "schedule")
+```
+
+Other functions: `research_workflow(steps)`, `problem_tree(problem, causes, consequences)`, `network_diagram(nodes, edges)`, `conceptual_framework(nodes, edges)`, `biological_pathway(steps)`, and `mechanism_diagram(steps)`. The last two are linear conceptual sequences, not biochemical structure renderers. Gantt tasks use numeric start and duration in the same units. TIFF is optional; the original default formats are unchanged.
