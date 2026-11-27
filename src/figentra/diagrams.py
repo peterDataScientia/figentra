@@ -6,7 +6,7 @@ from .style import style_context
 
 __all__ = ["venn_diagram", "research_workflow", "problem_tree",
            "conceptual_framework", "network_diagram", "biological_pathway",
-           "mechanism_diagram"]
+           "mechanism_diagram", "gantt_chart"]
 
 def _canvas(size_mm, background):
     with style_context():
@@ -27,6 +27,8 @@ def venn_diagram(labels, *, center="", colors=("#3979B9", "#C65F4A", "#38875C"),
         raise ValueError("Exactly three labels and colors are required")
     fig, ax = _canvas(size_mm, background)
     ax.set_aspect("equal")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(.05, 1.02)
     for (x,y), (tx,ty), label, color in zip(
         [( .33,.69),(.67,.69),(.50,.39)],
         [(.24,.76),(.76,.76),(.50,.25)], labels, colors):
@@ -117,3 +119,30 @@ def biological_pathway(steps, **kwargs):
 def mechanism_diagram(steps, **kwargs):
     """Draw a linear conceptual mechanism (not molecular structures)."""
     return research_workflow(steps, **kwargs)
+
+
+def gantt_chart(tasks, *, size_mm=(180,120), font_size=12,
+                font_weight="bold", line_width=2, color="#3979B9",
+                background="white", text_color="black", xlabel="Time"):
+    """Plot (label, start, duration) triples in numeric time units."""
+    tasks = list(tasks)
+    if not tasks or any(duration <= 0 for _, _, duration in tasks):
+        raise ValueError("Provide tasks with positive durations")
+    with style_context():
+        fig, ax = plt.subplots(figsize=tuple(v / 25.4 for v in size_mm))
+        for i, (label, start, duration) in enumerate(tasks):
+            ax.barh(i, duration, left=start, height=.6, color=color)
+        ax.set_yticks(range(len(tasks)), [t[0] for t in tasks])
+        ax.invert_yaxis()
+        ax.set_xlabel(xlabel, fontsize=font_size, fontweight=font_weight, color=text_color)
+        ax.tick_params(labelsize=font_size, width=line_width, colors=text_color)
+        for label in ax.get_xticklabels() + ax.get_yticklabels():
+            label.set_fontweight(font_weight)
+        for side in ("top", "right"):
+            ax.spines[side].set_visible(False)
+        for side in ("left", "bottom"):
+            ax.spines[side].set_linewidth(line_width)
+        ax.set_facecolor(background)
+        fig.patch.set_facecolor(background)
+        fig.tight_layout()
+    return fig, ax
