@@ -62,7 +62,7 @@ def protein_ligand_map(ligand_sdf, contacts, *, record=0, width=1200,
     for a in mol.GetAtoms():
         p=drawer.GetDrawCoords(a.GetIdx())
         points["L:"+str(a.GetIntProp("_figentra_index"))]=(p.x+ox,p.y+oy)
-    root=ET.Element("svg",{"xmlns":"http://www.w3.org/2000/svg",
+    root=ET.Element("{http://www.w3.org/2000/svg}svg",{
         "width":str(width),"height":str(height),"viewBox":f"0 0 {width} {height}"})
     _add(root,"rect",x=0,y=0,width=width,height=height,fill=background)
     _text(root,width/2,30,"Protein–ligand interaction map","#17212E",font_size+6)
