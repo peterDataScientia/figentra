@@ -126,3 +126,8 @@ def save_svg(svg, path):
     path.parent.mkdir(parents=True,exist_ok=True)
     path.write_text(svg,encoding="utf-8")
     return path
+
+from .reactions import (ElectronArrow, reaction_mechanism, molecular_structure,
+                        reaction_scheme, protonation_states, export_chemistry)
+__all__ += ["ElectronArrow", "reaction_mechanism", "molecular_structure",
+            "reaction_scheme", "protonation_states", "export_chemistry"]
