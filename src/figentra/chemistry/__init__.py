@@ -146,3 +146,6 @@ __all__ += ["Interaction", "detect_non_covalent", "interaction_bonds"]
 
 from .features import ChemicalFeatures, perceive_features, features_from_smiles, features_from_sdf, screen_sdf_contacts
 __all__ += ["ChemicalFeatures", "perceive_features", "features_from_smiles", "features_from_sdf", "screen_sdf_contacts"]
+
+from .protein import ReceptorAtom, ProteinContact, read_receptor, screen_protein_ligand, write_contact_csv, protein_contact_svg
+__all__ += ["ReceptorAtom", "ProteinContact", "read_receptor", "screen_protein_ligand", "write_contact_csv", "protein_contact_svg"]
